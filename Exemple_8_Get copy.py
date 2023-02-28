@@ -10,7 +10,7 @@ wlan.active(True)
 ssid = 'IIM_Private'
 password = 'Creatvive_Lab_2023'
 wlan.connect(ssid, password)
-url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/1"
+url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"
 
 arrayPin = [16,17, 18]
 blue = PWM(Pin(arrayPin[0], mode=Pin.OUT))
@@ -27,6 +27,12 @@ while not wlan.isconnected():
 
 print('connected')
 
+if wlan.isconnected():
+        print("Appuyez sur une touche pour chercher un Pokemon")
+        if input():
+            print("Entrez un nom de Pokémon")
+            url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"+input()
+
 while True:
     try:
         print("GET")
@@ -39,14 +45,12 @@ while True:
         utime.sleep(0.5)
         if type == "Plante":
             green.duty_u16(12000)
-
+        if type == "Feu":
+            red.duty_u16(12000)
+        if type == "Eau":
+            blue.duty_u16(12000)
     except:
         print("Error")
         utime.sleep(0.5)
 
-    # Boîte de dialogue pour modifier l'URL
-    if wlan.isconnected():
-        print("Appuyez sur une touche pour chercher un autre Pokemon")
-        if input():
-            print("Entrez un nom de Pokémon")
-            url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"+input()
+   
