@@ -27,13 +27,23 @@ while not wlan.isconnected():
 
 print('connected')
 
-if wlan.isconnected():
-        print("Appuyez sur une touche pour chercher un Pokemon")
-        if input():
-            print("Entrez un nom de Pokémon")
-            url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"+input()
+endLoop = False
+
+types_colors = {
+        "Plante": green,
+        "Feu": red,
+        "Eau": blue
+    }
 
 while True:
+    print("Entrez un nom de Pokémon")
+    url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + input()
+    
+    for color in types_colors.values():
+        color.freq(200)
+        color.duty_u16(0)
+
+    
     try:
         print("GET")
         response = urequests.get(url)
@@ -41,16 +51,19 @@ while True:
         types = data["types"]
         type = types[0]["name"]
         print(type)
+        if type in types_colors:
+            types_colors[type].duty_u16(12000)
+
         response.close()
         utime.sleep(0.5)
-        if type == "Plante":
-            green.duty_u16(12000)
-        if type == "Feu":
-            red.duty_u16(12000)
-        if type == "Eau":
-            blue.duty_u16(12000)
+        endLoop = True
     except:
         print("Error")
         utime.sleep(0.5)
 
-   
+
+    if endLoop :
+        print("Entrez un nom de Pokémon")
+        url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"+input()
+        endLoop = False
+    
