@@ -13,11 +13,12 @@ wlan.connect(ssid, password)
 url = "https://api-pokemon-fr.vercel.app/api/v1/pokemon/"
 
 arrayPin = [16,17, 18]
-blue = PWM(Pin(arrayPin[0], mode=Pin.OUT))
-green = PWM(Pin(arrayPin[1], mode=Pin.OUT))
-red = PWM(Pin(arrayPin[2], mode=Pin.OUT))
 
-blue.freq(1_000)
+blue = PWM(Pin(arrayPin[0], mode=Pin.OUT)) # 16 = blue
+green = PWM(Pin(arrayPin[1], mode=Pin.OUT)) # 17 = green
+red = PWM(Pin(arrayPin[2], mode=Pin.OUT)) # 18 = red
+
+blue.freq(1_000) 
 green.freq(1_000)
 red.freq(1_000)
 
@@ -32,8 +33,12 @@ endLoop = False
 types_colors = {
         "Plante": green,
         "Feu": red,
-        "Eau": blue
+        "Eau": blue,
     }
+
+
+
+
 
 while True:
     print("Entrez un nom de Pokémon")
@@ -42,7 +47,6 @@ while True:
     for color in types_colors.values():
         color.freq(200)
         color.duty_u16(0)
-
     
     try:
         print("GET")
@@ -52,8 +56,7 @@ while True:
         type = types[0]["name"]
         print(type)
         if type in types_colors:
-            types_colors[type].duty_u16(12000)
-
+            types_colors[type].duty_u16(12000) 
         response.close()
         utime.sleep(0.5)
         endLoop = True
