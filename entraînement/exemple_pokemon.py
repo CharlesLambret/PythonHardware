@@ -2,13 +2,22 @@ import network   #import des fonction lier au wifi
 import urequests    #import des fonction lier au requetes http
 import utime    #import des fonction lier au temps
 import ujson    #import des fonction lier aà la convertion en Json
-from machine import Pin, PWM
+from machine import Pin, PWM, I2C
+import ssd1306
+
+
 
 
 # Configuration de la LED RGB
 ledR = PWM(Pin(22, mode=Pin.OUT))
 ledG = PWM(Pin(21, mode=Pin.OUT))
 ledB = PWM(Pin(20, mode=Pin.OUT))
+
+# Configuration de l'écran OLED
+i2c = I2C(0, sda=Pin(8), scl=Pin(9))
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+oled.text("heyyy", 0,0)
+oled.show()
 
 # Dictionnaire des couleurs
 colors = {
