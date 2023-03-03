@@ -3,7 +3,7 @@ const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-
+let id = 0
 app.use(express.json());
 
 app.use(cors());
@@ -33,10 +33,13 @@ app.listen(8000, () => {
   console.log('Server is running on port 8000');
 });
 
+app.get('/id',(req,res)=>{
+  res.send({"id":id})
+})
+
 app.post('/pokemon', (req, res) => {
     const pokemon_id = req.body.pokemon_id;
-    // Appel de la fonction python et transmission de l'id du Pokémon sélectionné
-    // ...
+    id = pokemon_id
     console.log(pokemon_id)
-    res.status(200).send('OK');
+    res.send('OK');
 });

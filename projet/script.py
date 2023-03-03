@@ -3,8 +3,7 @@ import urequests    #import des fonction lier au requetes http
 import utime    #import des fonction lier au temps
 import ujson    #import des fonction lier aà la convertion en Json
 from machine import Pin, PWM, I2C
-import re
-
+import ssd1306
 
 
 
@@ -45,62 +44,64 @@ colors = {
 wlan = network.WLAN(network.STA_IF) # met la raspi en mode client wifi
 wlan.active(True) # active le mode client wifi
 
-ssid = 'sardochlevrai'
-password = '12345678'
+ssid = 'CanarDev'
+password = 'helloworld'
 wlan.connect(ssid, password) # connecte la raspi au réseau
 
 while not wlan.isconnected():
     print("attente de connexion")
     utime.sleep(0.1)
 
-fronturl = "172.20.10.5:8000/pokemons/"
-pokemon_name = fronturl.split("/")[2]
-
-print(pokemon_name)
+pokemonurl = urequests.get("http://172.20.10.8:8000/id")
+pokemon_id = pokemonurl.json()["id"]
+pokemonurl.close()
+print(pokemon_id)
 
 while True :
-    try:
-        response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + pokemon_name) # lance une requete sur l'url
+    print(pokemon_id)
+    
+    response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + str(pokemon_id)) # lance une requete sur l'url
 
-        if response.status_code == 200:
-            print("requête en cours...")
-            print(response.json()["types"][0]['name']) # traite sa reponse en Json
-            pokemon_type = response.json()["types"][0]['name']
-            if len(response.json()["types"]) >1:
-                pokemon_type2 = response.json()["types"][1]['name']
-            texte_encode = pokemon_type.encode('utf-8')
-            
-            
-            # Configuration de l'écran OLED pour afficher le nom du Pokémon
-            i2c = I2C(0, sda=Pin(8), scl=Pin(9))
-            oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-            oled.fill(0)
-            oled.text(pokemon_name, 0, 0)
-            oled.text(texte_encode, 0, 10)
-            if len(response.json()["types"]) >1:
-                oled.text(pokemon_type2, 0, 20)
-            
-            oled.show()
+    if response.status_code == 200:
+        print("requête en cours...")
+        print(response.json()["types"][0]['name']) # traite sa reponse en Json
+        pokemon_type = response.json()["types"][0]['name']
+        if len(response.json()["types"]) >1:
+            pokemon_type2 = response.json()["types"][1]['name']
+        texte_encode = pokemon_type.encode('utf-8')
+        pokemon_name = response.json()["name"]
+        
+        # Configuration de l'écran OLED pour afficher le nom du Pokémon
+        i2c = I2C(0, sda=Pin(8), scl=Pin(9))
+        oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+        oled.fill(0)
+        oled.text(str(pokemon_id), 0, 20)
+        oled.text(texte_encode, 0, 10)
+        oled.text(str(pokemon_name), 0, 0)
+        if len(response.json()["types"]) >1:
+            oled.text(pokemon_type2, 0, 20)
+        
+        oled.show()
 
 
-            color = colors.get(pokemon_type, (0, 0, 0))
-            if len(response.json()["types"]) >1:
-                color2 = colors.get(pokemon_type2, (0, 0, 0)) 
-            ledR.freq(1000) # Fréquence de 1 kHz 
-            ledG.freq(1000) # Fréquence de 1 kHz 
-            ledB.freq(1000) # Fréquence de 1 kHz
+        color = colors.get(pokemon_type, (0, 0, 0))
+        if len(response.json()["types"]) >1:
+            color2 = colors.get(pokemon_type2, (0, 0, 0)) 
+        ledR.freq(1000) # Fréquence de 1 kHz 
+        ledG.freq(1000) # Fréquence de 1 kHz 
+        ledB.freq(1000) # Fréquence de 1 kHz
+
+        ledR.duty_u16(color[0] * 256) # Rouge
+        ledG.duty_u16(color[1] * 256) # Vert
+        ledB.duty_u16(color[2] * 256) # Bleu
+        if len(response.json()["types"]) >1:
             ledR2.freq(1000) # Fréquence de 1 kHz 
             ledG2.freq(1000) # Fréquence de 1 kHz 
             ledB2.freq(1000) # Fréquence de 1 kHz 
-            ledR.duty_u16(color[0] * 256) # Rouge
-            ledG.duty_u16(color[1] * 256) # Vert
-            ledB.duty_u16(color[2] * 256) # Bleu
-            if len(response.json()["types"]) >1:
-                ledR2.duty_u16(color2[0] * 256) # Rouge
-                ledG2.duty_u16(color2[1] * 256) # Vert
-                ledB2.duty_u16(color2[2] * 256) # Bleu
-            response.close() # ferme la demande
-            utime.sleep(1)
-    except Exception as e:
-        print("pokemon introuvable ou information introuvable" )
-        print(e)
+            ledR2.duty_u16(color2[0] * 256) # Rouge
+            ledG2.duty_u16(color2[1] * 256) # Vert
+            ledB2.duty_u16(color2[2] * 256) # Bleu
+        response.close() # ferme la demande
+        utime.sleep(1)
+    
+
