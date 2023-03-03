@@ -1,6 +1,7 @@
 import React from "react";
 
-export default function PokemonCard(id, name, image, type) {
+export default function PokemonCard(id, name, image, types) {
+  
     return( 
         <div className="pokemon">
             <div className="img-container">
@@ -9,7 +10,9 @@ export default function PokemonCard(id, name, image, type) {
             <div className="info">
               <span className="number">#{id.toString().padStart(3, '0')}</span>
               <h3 className="name">{name}</h3>
-              <small className="type">Type: <span>{type.map(type => type.type.name).join(', ')}</span></small>
+              {types.map(type => (
+                <span className="type">{type.name}</span>
+              ))}
             </div>
           </div>
     )
