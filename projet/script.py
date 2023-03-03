@@ -55,7 +55,8 @@ while not wlan.isconnected():
 
 
 try:
-    pokemon_name = input("Entrez le nom d'un Pokémon : ")
+    fronturl = "localhost3000/"
+    pokemon_name = fronturl.split("/")[-1]
     
 
     response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + pokemon_name) # lance une requete sur l'url
