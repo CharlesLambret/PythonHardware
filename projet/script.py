@@ -3,7 +3,8 @@ import urequests    #import des fonction lier au requetes http
 import utime    #import des fonction lier au temps
 import ujson    #import des fonction lier aà la convertion en Json
 from machine import Pin, PWM, I2C
-import ssd1306
+import re
+
 
 
 
@@ -44,20 +45,20 @@ colors = {
 wlan = network.WLAN(network.STA_IF) # met la raspi en mode client wifi
 wlan.active(True) # active le mode client wifi
 
-ssid = 'IIM_Private'
-password = 'Creatvive_Lab_2023'
+ssid = 'sardochlevrai'
+password = '12345678'
 wlan.connect(ssid, password) # connecte la raspi au réseau
 
 while not wlan.isconnected():
     print("attente de connexion")
     utime.sleep(0.1)
 
-fronturl = "localhost:3000/1"
-pokemon_name = fronturl.split("/")[1]
+fronturl = "172.20.10.5:8000/pokemons/"
+pokemon_name = fronturl.split("/")[2]
+
 print(pokemon_name)
 
 while True :
-    print(pokemon_name)
     try:
         response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + pokemon_name) # lance une requete sur l'url
 

@@ -3,37 +3,32 @@ import {useContext, useEffect, useState} from 'react';
 import PokemonCard from './components/pokemoncard';
 
 export function App() {
-  const [AllPokemons, setAllPokemons] = useState([]);
+const [AllPokemons, setAllPokemons] = useState([]);
 
-  const [loadmore, setLoadmore] = useState('https://pokeapi.co/api/v2/pokemon?limit=50');
-  const [selectedPokemon, setSelectedPokemon] = useState(null);
+const [loadmore, setLoadmore] = useState('http://localhost:8000/pokemons');
+const [selectedPokemon, setSelectedPokemon] = useState(null);
 
-  const getPokemons = async () => {
-    const response = await fetch(loadmore);
-    const data = await response.json();
-    setLoadmore(data.next);
+const getPokemons = async () => {
+  const response = await fetch(loadmore);
+  const data = await response.json();
+  setLoadmore(`http://localhost:8000/pokemons?limit=${data.length}`);
 
-    function createPokemonObject () {
-      data.results.forEach(async pokemon => {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-        const data = await response.json();
-        setAllPokemons(currentlist => [...currentlist, data]);
-        AllPokemons.push(data);
-      });
-    }
+  setAllPokemons(currentlist => {
+    const newData = data.filter(p => currentlist.filter(c => c.id === p.id).length === 0);
+    return [...currentlist, ...newData];
+  });
+};
 
-    createPokemonObject(data.result);
-  };
+useEffect(() => {
+  getPokemons();
+}, []);
 
-  useEffect(() => {
-    getPokemons();
-  }, []);
+useEffect(() => {
+  if (selectedPokemon !== null) {
+    window.history.pushState(null, '', `/${selectedPokemon.name}`);
+  }
+}, [selectedPokemon]);
 
-  useEffect(() => {
-    if (selectedPokemon !== null) {
-      window.history.pushState(null, '', `/${selectedPokemon.name}`);
-    }
-  }, [selectedPokemon]);
 
   return (
     <div className="App">
@@ -52,9 +47,19 @@ export function App() {
                 {pokemonStats.types.map(type => (
                   <span className="type">{type.name}</span>
                 ))}
-                <button className="btn" onClick={() => setSelectedPokemon(pokemonStats)}>
-                  Sélectionner le Pokémon
+                <button className="btn" onClick={() => {
+                      setSelectedPokemon(pokemonStats);
+                      fetch('http://localhost:8000/pokemon', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify({pokemon_id: pokemonStats.id})
+                      })
+                  }}>
+                      Sélectionner le Pokémon
                 </button>
+
               </div>
             </div>
           ))}
