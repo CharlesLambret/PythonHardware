@@ -50,52 +50,56 @@ wlan.connect(ssid, password) # connecte la raspi au réseau
 
 while not wlan.isconnected():
     print("attente de connexion")
-    utime.sleep(1)
+    utime.sleep(0.1)
+
+fronturl = "localhost:3000/1"
+pokemon_name = fronturl.split("/")[1]
+print(pokemon_name)
+
+while True :
+    print(pokemon_name)
+    try:
+        response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + pokemon_name) # lance une requete sur l'url
+
+        if response.status_code == 200:
+            print("requête en cours...")
+            print(response.json()["types"][0]['name']) # traite sa reponse en Json
+            pokemon_type = response.json()["types"][0]['name']
+            if len(response.json()["types"]) >1:
+                pokemon_type2 = response.json()["types"][1]['name']
+            texte_encode = pokemon_type.encode('utf-8')
+            
+            
+            # Configuration de l'écran OLED pour afficher le nom du Pokémon
+            i2c = I2C(0, sda=Pin(8), scl=Pin(9))
+            oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+            oled.fill(0)
+            oled.text(pokemon_name, 0, 0)
+            oled.text(texte_encode, 0, 10)
+            if len(response.json()["types"]) >1:
+                oled.text(pokemon_type2, 0, 20)
+            
+            oled.show()
 
 
-
-try:
-    fronturl = "localhost3000/"
-    pokemon_name = fronturl.split("/")[-1]
-    
-
-    response = urequests.get("https://api-pokemon-fr.vercel.app/api/v1/pokemon/" + pokemon_name) # lance une requete sur l'url
-
-    if response.status_code == 200:
-        print("requête en cours...")
-        print(response.json()["types"][0]['name']) # traite sa reponse en Json
-        pokemon_type = response.json()["types"][0]['name']
-        pokemon_type2 = response.json()["types"][1]['name']
-        texte_encode = pokemon_type.encode('utf-8')
-        
-        
-        # Configuration de l'écran OLED pour afficher le nom du Pokémon
-        i2c = I2C(0, sda=Pin(8), scl=Pin(9))
-        oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-        oled.fill(0)
-        oled.text(pokemon_name, 0, 0)
-        oled.text(texte_encode, 0, 10)
-        oled.text(pokemon_type2, 0, 20)
-        
-        oled.show()
-
-
-        color = colors.get(pokemon_type, (0, 0, 0))
-        color2 = colors.get(pokemon_type2, (0, 0, 0)) 
-        ledR.freq(1000) # Fréquence de 1 kHz 
-        ledG.freq(1000) # Fréquence de 1 kHz 
-        ledB.freq(1000) # Fréquence de 1 kHz
-        ledR2.freq(1000) # Fréquence de 1 kHz 
-        ledG2.freq(1000) # Fréquence de 1 kHz 
-        ledB2.freq(1000) # Fréquence de 1 kHz 
-        ledR.duty_u16(color[0] * 256) # Rouge
-        ledG.duty_u16(color[1] * 256) # Vert
-        ledB.duty_u16(color[2] * 256) # Bleu
-        ledR2.duty_u16(color2[0] * 256) # Rouge
-        ledG2.duty_u16(color2[1] * 256) # Vert
-        ledB2.duty_u16(color2[2] * 256) # Bleu
-        response.close() # ferme la demande
-        utime.sleep(1)
-except Exception as e:
-    print("pokemon introuvable ou information introuvable" )
-    print(e)
+            color = colors.get(pokemon_type, (0, 0, 0))
+            if len(response.json()["types"]) >1:
+                color2 = colors.get(pokemon_type2, (0, 0, 0)) 
+            ledR.freq(1000) # Fréquence de 1 kHz 
+            ledG.freq(1000) # Fréquence de 1 kHz 
+            ledB.freq(1000) # Fréquence de 1 kHz
+            ledR2.freq(1000) # Fréquence de 1 kHz 
+            ledG2.freq(1000) # Fréquence de 1 kHz 
+            ledB2.freq(1000) # Fréquence de 1 kHz 
+            ledR.duty_u16(color[0] * 256) # Rouge
+            ledG.duty_u16(color[1] * 256) # Vert
+            ledB.duty_u16(color[2] * 256) # Bleu
+            if len(response.json()["types"]) >1:
+                ledR2.duty_u16(color2[0] * 256) # Rouge
+                ledG2.duty_u16(color2[1] * 256) # Vert
+                ledB2.duty_u16(color2[2] * 256) # Bleu
+            response.close() # ferme la demande
+            utime.sleep(1)
+    except Exception as e:
+        print("pokemon introuvable ou information introuvable" )
+        print(e)
